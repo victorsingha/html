@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spread Canvas Walkers</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #walkercanvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="walkercanvas"></canvas>
+
+  <script>
+    class Walker {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+      }
+
+      update(x, y) {
+        this.x = x;
+        this.y = y;
+      }
+    }
+
+    const canvas = document.getElementById('walkercanvas');
+    const ctx = canvas.getContext('2d');
+    const walkers = [];
+    const colors = [
+      'rgba(255, 0, 126, .1)',
+      'rgba(144, 163, 175, 0.1)',
+      'rgba(255, 165, 20, .1)'
+    ];
+
+    function rand(max) {
+      return Math.floor(Math.random() * max);
+    }
+
+    function setupCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.lineWidth = 3;
+
+      const centerX = Math.floor(canvas.width / 2);
+      const centerY = Math.floor(canvas.height / 2);
+
+      for (let i = 0; i < 500; i++) {
+        const color = colors[rand(colors.length)];
+        walkers.push(new Walker(centerX, centerY, color));
+      }
+    }
+
+    function drawEach(walker) {
+      let x = walker.x;
+      let y = walker.y;
+
+      switch (rand(4)) {
+        case 0: if (x < canvas.width) x += 5; break;
+        case 1: if (x > 0) x -= 5; break;
+        case 2: if (y < canvas.height) y += 5; break;
+        case 3: if (y > 0) y -= 5; break;
+      }
+
+      ctx.strokeStyle = walker.color;
+      ctx.beginPath();
+      ctx.moveTo(walker.x, walker.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      walker.update(x, y);
+    }
+
+    function draw() {
+      for (const walker of walkers) {
+        drawEach(walker);
+      }
+      requestAnimationFrame(draw);
+    }
+
+    // Initial setup
+    setupCanvas();
+    draw();
+
+    // Optional: Re-initialize on window resize
+    // window.addEventListener('resize', () => {
+    //   walkers.length = 0;
+    //   setupCanvas();
+    // });
+  </script>
+</body>
+</html>
