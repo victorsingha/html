@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LED Word Display - Light Mode</title>
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+
+    .led-board {
+      padding: 20px;
+      width: 90vw;
+      height: auto;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
+
+    circle {
+      fill: #dcdcdc; /* Light grey for all dots by default */
+      transition: fill 0.5s ease-in-out, filter 0.5s ease-in-out, opacity 0.5s;
+    }
+
+    circle.glow {
+      fill: #a855f7;
+      animation: randomGlowEffect 2.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes randomGlowEffect {
+      0% { filter: drop-shadow(0 0 1px #a855f7) brightness(120%); opacity: 1; }
+      50% { filter: drop-shadow(0 0 5px #a855f7) brightness(160%); opacity: 0.85; }
+      100% { filter: drop-shadow(0 0 10px #a855f7) brightness(180%); opacity: 1; }
+    }
+
+    circle.hover-glow {
+      fill: black;
+      animation: hoverGlowEffect 0.8s forwards ease-in-out;
+    }
+
+    @keyframes hoverGlowEffect {
+      0% { filter: brightness(100%); opacity: 1; }
+      100% { filter: drop-shadow(0 0 10px #a855f7) brightness(200%); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="led-board" id="ledBoard">
+  <svg id="ledSvg"></svg>
+</div>
+
+<script>
+  let word = "TOSHFA";
+  const rows = 15;
+  let cols = 0;
+  let matrix = [];
+  let glowMatrix = [];
+  let isHovering = false;
+
+  const charMap = {
+    T: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
+    O: [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
+    S: [[1,1,1,1],[1,0,0,0],[1,1,1,1],[0,0,0,1],[0,0,0,1],[1,1,1,1]],
+    H: [[1,0,0,1],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,0,0,1]],
+    F: [[1,1,1,1],[1,0,0,0],[1,1,1,0],[1,0,0,0],[1,0,0,0],[1,0,0,0]],
+    A: [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]]
+  };
+
+  function createMatrix(rows, cols) {
+    return Array.from({ length: rows }, () => Array(cols).fill(false));
+  }
+
+  function createBoard() {
+    const wordArray = word.toUpperCase().split('');
+    cols = wordArray.reduce((sum, char) => {
+      const width = (charMap[char]?.[0]?.length || 0);
+      return sum + (width + 1) * 2;
+    }, 2);
+
+    matrix = createMatrix(rows, cols);
+    glowMatrix = createMatrix(rows, cols);
+
+    let startRow = 2, startCol = 2;
+
+    wordArray.forEach(char => {
+      const pattern = charMap[char];
+      if (!pattern) return;
+
+      pattern.forEach((row, i) => {
+        row.forEach((val, j) => {
+          if (val) matrix[startRow + i * 2][startCol + j * 2] = true;
+        });
+      });
+
+      startCol += (pattern[0].length + 1) * 2;
+    });
+  }
+
+  function renderBoard() {
+    const svg = document.getElementById('ledSvg');
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', `0 0 ${cols} ${rows}`);
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (i % 2 === 0 && j % 2 === 0) {
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", j + 0.25);
+          circle.setAttribute("cy", i + 0.25);
+          circle.setAttribute("r", 0.25);
+
+          // No `.lit` class anymore
+          if (isHovering && matrix[i][j]) circle.classList.add('hover-glow');
+          if (!isHovering && glowMatrix[i][j]) circle.classList.add('glow');
+
+          svg.appendChild(circle);
+        }
+      }
+    }
+  }
+
+  function startRandomGlow() {
+    setInterval(() => {
+      if (isHovering) return;
+
+      glowMatrix = createMatrix(rows, cols);
+      const litDots = [];
+
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          if (matrix[i][j]) litDots.push({ row: i, col: j });
+        }
+      }
+
+      const selected = litDots.sort(() => Math.random() - 0.5).slice(0, 5);
+      selected.forEach(dot => glowMatrix[dot.row][dot.col] = true);
+      renderBoard();
+    }, 2000);
+  }
+
+  const board = document.getElementById('ledBoard');
+  board.addEventListener('mouseenter', () => {
+    isHovering = true;
+    renderBoard();
+  });
+
+  board.addEventListener('mouseleave', () => {
+    isHovering = false;
+    renderBoard();
+  });
+
+  createBoard();
+  renderBoard();
+  startRandomGlow();
+</script>
+
+</body>
+</html>
