@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cytoscape Multi-Parent Org Chart</title>
+  <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    #cy {
+      width: 100%;
+      height: 95vh;
+      display: block;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center; margin:10px 0;">Org Chart with Multiple Parents (Cytoscape.js)</h2>
+  <div id="cy"></div>
+
+  <script>
+    var cy = cytoscape({
+      container: document.getElementById('cy'),
+
+      elements: [
+        // === NODES ===
+        { data: { id: 'UW', label: 'UW Debit Note' } },
+        { data: { id: 'Access', label: 'Acess Meditech' } },
+        { data: { id: 'Sherif', label: 'Sherif Samir Elsayed Kholafa' } },
+        { data: { id: 'Mohammad', label: 'Mohammad Al Beeshi' } },
+        { data: { id: 'Abdulrahman', label: 'Abdulrahman M. M. Aldweib' } },
+        { data: { id: 'Mohamed', label: 'Mohamed Ragaie Rajab Mahmoud Ayoub' } },
+        { data: { id: 'Reem', label: 'Reem Saied Ahmad Ba-matraf' } },
+        { data: { id: 'Rowida', label: 'Rowida Hassan Fouad Emam' } },
+        { data: { id: 'Roshan', label: 'Roshan GM UW' } },
+
+        // === EDGES (relationships) ===
+        { data: { source: 'UW', target: 'Access' } },
+        { data: { source: 'UW', target: 'Sherif' } },
+        { data: { source: 'UW', target: 'Mohammad' } },
+
+        // Abdulrahman has 2 parents 👇
+        { data: { source: 'Sherif', target: 'Abdulrahman' } },
+        { data: { source: 'Mohammad', target: 'Abdulrahman' } },
+
+        // Abdulrahman’s team 👇
+        { data: { source: 'Abdulrahman', target: 'Mohamed' } },
+        { data: { source: 'Abdulrahman', target: 'Reem' } },
+        { data: { source: 'Abdulrahman', target: 'Rowida' } },
+        { data: { source: 'Abdulrahman', target: 'Roshan' } }
+      ],
+
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': '#007bff',
+            'label': 'data(label)',
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '11px',
+            'width': '160px',
+            'height': '40px',
+            'shape': 'roundrectangle',
+            'text-wrap': 'wrap'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#666',
+            'target-arrow-color': '#666',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier'
+          }
+        }
+      ],
+
+      layout: {
+        name: 'breadthfirst',
+        directed: true,
+        padding: 20,
+        spacingFactor: 1.2
+      }
+    });
+
+    // Optional: Auto-fit chart to view
+    cy.ready(() => {
+      cy.fit();
+    });
+  </script>
+</body>
+</html>
