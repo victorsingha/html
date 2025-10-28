@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>D3 Org Chart (Multi-Parent)</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #f9fafb;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    svg {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: white;
+    }
+    .node rect {
+      fill: white;
+      stroke: #d1d5db;
+      stroke-width: 2;
+      rx: 12;
+      ry: 12;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+    .node text {
+      font-size: 14px;
+      fill: #111827;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+    .link {
+      fill: none;
+      stroke: #9ca3af;
+      stroke-width: 2px;
+      opacity: 0.8;
+    }
+    .zoom-controls {
+      margin: 10px;
+    }
+    .zoom-btn {
+      background-color: #2563eb;
+      color: white;
+      padding: 6px 12px;
+      margin: 0 5px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .zoom-btn:hover {
+      background-color: #1e40af;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="text-2xl font-bold text-gray-800 mb-3">Organization Chart (Multi-Parent)</h1>
+
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="zoomIn">Zoom In</button>
+    <button class="zoom-btn" id="zoomOut">Zoom Out</button>
+  </div>
+
+  <svg id="orgChart" width="1000" height="700"></svg>
+
+  <script>
+    // Example data with multiple parents
+    const nodes = [
+      { id: "Victor (CEO)" },
+      { id: "Alice (CTO)" },
+      { id: "Bob (CFO)" },
+      { id: "Charlie (Manager - Dual)" },
+      { id: "Emma (Developer)" }
+    ];
+
+    const links = [
+      { source: "Victor (CEO)", target: "Alice (CTO)" },
+      { source: "Victor (CEO)", target: "Bob (CFO)" },
+      { source: "Alice (CTO)", target: "Charlie (Manager - Dual)" },
+      { source: "Bob (CFO)", target: "Charlie (Manager - Dual)" }, // Multi-parent link
+      { source: "Charlie (Manager - Dual)", target: "Emma (Developer)" }
+    ];
+
+    const svg = d3.select("#orgChart"),
+      width = +svg.attr("width"),
+      height = +svg.attr("height");
+
+    const g = svg.append("g");
+
+    const zoom = d3.zoom()
+      .scaleExtent([0.5, 2])
+      .on("zoom", (event) => g.attr("transform", event.transform));
+    svg.call(zoom);
+
+    // Create simulation first ✅
+    const simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id).distance(180))
+      .force("charge", d3.forceManyBody().strength(-800))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("y", d3.forceY().strength(0.05))
+      .force("x", d3.forceX().strength(0.05));
+
+    // Define the links
+    const link = g.selectAll(".link")
+      .data(links)
+      .enter()
+      .append("line")
+      .attr("class", "link");
+
+    // Define the nodes (after simulation is created)
+    const node = g.selectAll(".node")
+      .data(nodes)
+      .enter()
+      .append("g")
+      .attr("class", "node")
+      .call(d3.drag()
+        .on("start", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on("drag", (event, d) => {
+          d.fx = event.x;
+          d.fy = event.y;
+        })
+        .on("end", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        })
+      );
+
+    node.append("rect")
+      .attr("width", 200)
+      .attr("height", 60)
+      .attr("x", -100)
+      .attr("y", -30);
+
+    node.append("text")
+      .attr("dy", "0.35em")
+      .text(d => d.id);
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    // Zoom buttons
+    document.getElementById("zoomIn").onclick = () => svg.transition().call(zoom.scaleBy, 1.2);
+    document.getElementById("zoomOut").onclick = () => svg.transition().call(zoom.scaleBy, 0.8);
+  </script>
+</body>
+</html>
