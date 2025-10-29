@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balkan Family Tree</title>
+  <style>
+    /* Page layout */
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7fafc,#eef2f7);}
+    .header{display:flex;align-items:center;gap:12px;padding:18px 24px;background:rgba(255,255,255,0.8);box-shadow:0 6px 18px rgba(20,20,40,0.06);}
+    .logo{height:50px;width:50px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:#475569;font-size:13px}
+
+    /* Main area */
+    .wrap{display:flex;height:calc(100% - 86px)}
+    .left{width:300px;padding:18px;box-sizing:border-box;border-right:1px solid rgba(15,23,42,0.04);background:rgba(255,255,255,0.6)}
+    .right{flex:1;position:relative}
+    #cy{position:absolute;inset:12px;border-radius:10px;background:white;box-shadow:0 8px 30px rgba(15,23,42,0.06);}
+
+    /* Controls */
+    .controls{display:flex;flex-direction:column;gap:10px}
+    .controls label{font-size:13px;color:#334155}
+    .controls button, .controls input, .controls select{padding:8px 10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:white}
+    .node-info{margin-top:12px;font-size:13px;color:#0f172a}
+
+    /* Small helper styles for cytoscape nodes in legend */
+    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .legend .item{display:flex;align-items:center;gap:8px}
+    .avatar{height:36px;width:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600}
+
+    @media (max-width:800px){.left{display:none}.header h1{font-size:16px}}
+  </style>
+  <!-- Cytoscape + dagre layout from CDN -->
+  <script src="https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+  <script src="https://unpkg.com/cytoscape-dagre@2.3.2/cytoscape-dagre.js"></script>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">BF</div>
+    <div>
+      <h1>Balkan Family Tree</h1>
+      <p class="lead">Interactive family tree chart — supports multiple parents, collapsing and details.</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="left">
+      <div class="controls">
+        <label>Layout</label>
+        <select id="layoutSelect">
+          <option value="dagre">Top-to-bottom (dagre)</option>
+          <option value="breadthfirst">Left-to-right (breadthfirst)</option>
+        </select>
+
+        <label>Search by name</label>
+        <input id="search" placeholder="Type a name..." />
+
+        <div style="display:flex;gap:8px">
+          <button id="fit">Fit</button>
+          <button id="zoomIn">Zoom +</button>
+          <button id="zoomOut">Zoom -</button>
+          <button id="reset">Reset</button>
+        </div>
+
+        <div class="node-info">
+          <strong>Click a person</strong> to see relations below.
+          <div id="details" style="margin-top:8px;color:#334155;font-size:13px">No selection</div>
+        </div>
+
+        <div style="margin-top:14px">
+          <strong>Legend</strong>
+          <div class="legend">
+            <div class="item"><div class="avatar" style="background:#0ea5a4">G</div>Grandparent</div>
+            <div class="item"><div class="avatar" style="background:#ef4444">P</div>Parent</div>
+            <div class="item"><div class="avatar" style="background:#3b82f6">C</div>Child</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div id="cy"></div>
+    </div>
+  </div>
+
+<script>
+// register dagre
+cytoscape.use(cytoscapeDagre);
+
+// sample Balkan family data (names typical to the region)
+const elements = [
+  // grandparents
+  { data: { id: 'ivan', name: 'Ivan (b.1945)', role: 'Grandfather' } },
+  { data: { id: 'milena', name: 'Milena (b.1948)', role: 'Grandmother' } },
+  { data: { id: 'stoyan', name: 'Stoyan (b.1947)', role: 'Grandfather' } },
+  { data: { id: 'sofija', name: 'Sofija (b.1950)', role: 'Grandmother' } },
+
+  // parents (two different families)
+  { data: { id: 'nikola', name: 'Nikola (b.1972)', role: 'Father' } },
+  { data: { id: 'ana', name: 'Ana (b.1975)', role: 'Mother' } },
+  { data: { id: 'petar', name: 'Petar (b.1973)', role: 'Father' } },
+  { data: { id: 'marija', name: 'Marija (b.1974)', role: 'Mother' } },
+
+  // children (note: multi-parent example — jasna is child of nikola+ana)
+  { data: { id: 'jasna', name: 'Jasna (b.2000)', role: 'Daughter' } },
+  { data: { id: 'alek', name: 'Alek (b.2002)', role: 'Son' } },
+  { data: { id: 'stella', name: 'Stella (b.2005)', role: 'Daughter' } },
+
+  // edges (parent -> child)
+  { data: { id: 'ivan-milena->nikola', source: 'ivan', target: 'nikola' } },
+  { data: { id: 'ivan-milena->ana', source: 'milena', target: 'ana' } },
+
+  { data: { id: 'stoyan-sofija->petar', source: 'stoyan', target: 'petar' } },
+  { data: { id: 'stoyan-sofija->marija', source: 'sofija', target: 'marija' } },
+
+  // Nikola + Ana -> Jasna & Alek
+  { data: { id: 'nikola->jasna', source: 'nikola', target: 'jasna' } },
+  { data: { id: 'ana->jasna', source: 'ana', target: 'jasna' } },
+  { data: { id: 'nikola->alek', source: 'nikola', target: 'alek' } },
+
+  // Petar + Marija -> Stella
+  { data: { id: 'petar->stella', source: 'petar', target: 'stella' } },
+  { data: { id: 'marija->stella', source: 'marija', target: 'stella' } },
+
+  // Cross-link (for complexity): Marija is sibling of Ana (example)
+  { data: { id: 'milena->marija', source: 'milena', target: 'marija' } }
+];
+
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements: elements,
+  style: [
+    {
+      selector: 'node',
+      style: {
+        'background-color': '#3b82f6',
+        'label': 'data(name)',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'color': '#fff',
+        'text-wrap': 'wrap',
+        'width': 'label',
+        'height': 'label',
+        'padding': '10px',
+        'font-size': '12px',
+        'shape': 'round-rectangle',
+        'border-width': 2,
+        'border-color': '#1e3a8a'
+      }
+    },
+    {
+      selector: 'edge',
+      style: {
+        'curve-style': 'bezier',
+        'target-arrow-shape': 'triangle',
+        'target-arrow-color': '#94a3b8',
+        'line-color': '#cbd5e1',
+        'width': 2
+      }
+    },
+    {
+      selector: ':selected',
+      style: {
+        'background-color': '#f97316',
+        'border-color': '#9a3412'
+      }
+    }
+  ],
+  layout: { name: 'dagre', rankDir: 'TB', nodeSep: 40, rankSep: 80 },
+  userZoomingEnabled: true,
+  userPanningEnabled: true
+});
+
+// fit container sizing after render
+function resizeCy(){
+  const right = document.querySelector('.right');
+  const inset = 12; // match CSS
+  const rect = right.getBoundingClientRect();
+  const el = document.getElementById('cy');
+  el.style.left = inset + 'px';
+  el.style.top = inset + 'px';
+  el.style.width = (rect.width - inset*2) + 'px';
+  el.style.height = (rect.height - inset*2) + 'px';
+  cy.resize();
+}
+
+window.addEventListener('resize', resizeCy);
+setTimeout(resizeCy, 50);
+
+// controls
+document.getElementById('fit').addEventListener('click', ()=> cy.fit());
+document.getElementById('zoomIn').addEventListener('click', ()=> cy.zoom({level: cy.zoom()*1.2, renderedPosition: {x: cy.width()/2, y: cy.height()/2}}));
+document.getElementById('zoomOut').addEventListener('click', ()=> cy.zoom({level: cy.zoom()*0.8, renderedPosition: {x: cy.width()/2, y: cy.height()/2}}));
+document.getElementById('reset').addEventListener('click', ()=> {
+  cy.elements().unselect();
+  cy.zoom(1);
+  cy.pan({x:0,y:0});
+  cy.layout({ name: 'dagre', rankDir: 'TB', nodeSep: 40, rankSep: 80 }).run();
+});
+
+// layout switch
+const layoutSelect = document.getElementById('layoutSelect');
+layoutSelect.addEventListener('change', ()=>{
+  const name = layoutSelect.value;
+  const opts = name === 'dagre' ? { name: 'dagre', rankDir: 'TB', nodeSep: 40, rankSep: 80 } : { name: 'breadthfirst', directed: true, spacingFactor: 1.6, orientation: 'horizontal' };
+  cy.layout(opts).run();
+});
+
+// search
+const search = document.getElementById('search');
+search.addEventListener('input', ()=>{
+  const q = search.value.trim().toLowerCase();
+  if(!q){ cy.nodes().style('opacity',1); return; }
+  cy.nodes().forEach(n=>{
+    const match = n.data('name').toLowerCase().includes(q);
+    n.style('opacity', match ? 1 : 0.12);
+  });
+});
+
+// click handler to show relations
+cy.on('tap', 'node', (evt)=>{
+  const node = evt.target;
+  const d = node.data();
+  const details = document.getElementById('details');
+  // neighbors: parents = incoming sources, children = outgoing targets
+  const parents = node.incomers('node');
+  const children = node.outgoers('node');
+  const parentNames = parents.map(p=>p.data('name'));
+  const childNames = children.map(c=>c.data('name'));
+
+  details.innerHTML = `
+    <div style="font-weight:600">${d.name}</div>
+    <div style="margin-top:6px"><strong>Role:</strong> ${d.role || '—'}</div>
+    <div style="margin-top:6px"><strong>Parents:</strong> ${parentNames.length ? parentNames.join(', ') : '—'}</div>
+    <div style="margin-top:4px"><strong>Children:</strong> ${childNames.length ? childNames.join(', ') : '—'}</div>
+  `;
+});
+
+// clicking background clears selection
+cy.on('tap', (evt)=>{
+  if(evt.target === cy) document.getElementById('details').innerText = 'No selection';
+});
+
+// make nodes draggable for manual arrangement
+cy.nodes().forEach(n=> n.grabify());
+
+// initial fit
+cy.ready(()=> setTimeout(()=> cy.fit(), 120));
+
+</script>
+</body>
+</html>
