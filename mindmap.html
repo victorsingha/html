@@ -5,32 +5,161 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mind Map — index.html</title>
   <style>
-    :root{--bg:#0f172a;--card:#0b1220;--accent:#7c3aed;--text:#e6eef8}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,var(--bg),#071128);color:var(--text)}
-    .app{height:100%;display:grid;grid-template-columns:1fr 340px}
-    header{grid-column:1/-1;padding:12px 18px;background:transparent;display:flex;align-items:center;gap:12px}
-    header h1{font-size:16px;margin:0}
-    #canvas{background:transparent;position:relative;overflow:hidden}
-    svg{width:100%;height:100%;display:block}
+    :root {
+      --bg: #0f172a;
+      --card: #0b1220;
+      --accent: #7c3aed;
+      --accent-hover: #9d6bff;
+      --text: #e6eef8;
+      --muted: rgba(230, 238, 248, 0.7);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, Segoe UI, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #071128);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      grid-column: 1 / -1;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+    }
+
+    header h1 {
+      font-size: 16px;
+      margin: 0;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    header .muted {
+      font-size: 12px;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    #canvas {
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
 
     /* side panel */
-    .panel{padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));backdrop-filter:blur(6px);border-left:1px solid rgba(255,255,255,0.03)}
-    .panel h3{margin:6px 0 8px;font-size:13px}
-    .btn{display:inline-block;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.02);cursor:pointer;font-size:13px}
-    .controls{display:flex;flex-wrap:wrap;gap:8px}
-    .info{font-size:12px;color:rgba(230,238,248,0.75);margin-top:10px}
-    .node-label{pointer-events:none;font-size:12px;fill:#fff}
-    .node-circle{stroke:rgba(255,255,255,0.08);stroke-width:1.2}
-    input[type=file]{display:none}
-    textarea{width:100%;height:120px;background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px}
-    .muted{opacity:0.8;font-size:12px}
+    .panel {
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      backdrop-filter: blur(10px);
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .panel h3 {
+      margin: 6px 0 8px;
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: #fff;
+      font-weight: 500;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    input[type=file] {
+      display: none;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      border-radius: 8px;
+      font-family: monospace;
+      resize: none;
+    }
+
+    .muted {
+      opacity: 0.8;
+      font-size: 12px;
+    }
+
+    .info {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 8px;
+    }
+
+    .node-label {
+      pointer-events: none;
+      font-size: 12px;
+      fill: #fff;
+    }
+
+    .node-circle {
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 1.2;
+    }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>Mind Map</h1>
-      <div class="muted">Double-click a node to edit. Right-click a node to add a child. Click a node to select. Press Delete to remove selected node. Drag nodes to rearrange. Use mouse wheel + drag to zoom/pan.</div>
+      <h1>🧠 Mind Map</h1>
+      <div class="muted">
+        Double-click a node to edit. Right-click to add child. Click to select. Press Delete to remove. Drag nodes to move. Use mouse wheel to zoom/pan.
+      </div>
     </header>
 
     <div id="canvas">
@@ -38,31 +167,35 @@
     </div>
 
     <aside class="panel">
-      <h3>Controls</h3>
-      <div class="controls">
-        <button id="addRoot" class="btn">Add Root</button>
-        <button id="center" class="btn">Center</button>
-        <button id="export" class="btn">Export JSON</button>
-        <label class="btn" for="importFile">Import JSON</label>
-        <input id="importFile" type="file" accept="application/json">
-        <button id="reset" class="btn">Reset</button>
-      </div>
+      <div>
+        <h3>Controls</h3>
+        <div class="controls">
+          <button id="addRoot" class="btn">➕ Add Root</button>
+          <button id="center" class="btn">🎯 Center</button>
+          <button id="export" class="btn">💾 Export</button>
+          <label class="btn" for="importFile">📂 Import</label>
+          <input id="importFile" type="file" accept="application/json">
+          <button id="reset" class="btn">♻️ Reset</button>
+        </div>
 
-      <div style="margin-top:12px">
-        <h3>Selected Node</h3>
-        <div id="selectedInfo" class="muted">None</div>
-        <div style="margin-top:8px">
-          <button id="addChildBtn" class="btn">Add Child</button>
-          <button id="deleteBtn" class="btn">Delete Node</button>
+        <div style="margin-top:16px">
+          <h3>Selected Node</h3>
+          <div id="selectedInfo" class="muted">None</div>
+          <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="addChildBtn" class="btn">🌿 Add Child</button>
+            <button id="deleteBtn" class="btn">🗑️ Delete</button>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <h3>Export / Save</h3>
+          <textarea id="exportArea" readonly></textarea>
         </div>
       </div>
 
-      <div style="margin-top:12px">
-        <h3>Export / Save</h3>
-        <textarea id="exportArea" readonly></textarea>
+      <div class="info">
+        ⚙️ Small, single-file mind map built with D3.js — clean, editable, and portable.
       </div>
-
-      <div class="info">Small, single-file mind map using D3. Feel free to modify and embed in your own projects.</div>
     </aside>
   </div>
 
@@ -78,31 +211,40 @@
     root.children.push(newNode('Branch B'));
     root.children[0].children.push(newNode('Sub A1'));
 
-    // flatten tree to nodes/links
     function treeToLists(root){
       const nodes = [];
       const links = [];
-      (function walk(n, parent){ nodes.push(n); if(parent) links.push({ source: parent.id, target: n.id }); if(n.children) n.children.forEach(child=>walk(child,n)); })(root,null);
+      (function walk(n, parent){ 
+        nodes.push(n); 
+        if(parent) links.push({ source: parent.id, target: n.id }); 
+        if(n.children) n.children.forEach(child=>walk(child,n)); 
+      })(root,null);
       return {nodes,links};
     }
 
-    // find node by id
-    function findNode(n, id){ if(n.id===id) return n; if(!n.children) return null; for(const c of n.children){ const f=findNode(c,id); if(f) return f } return null }
-    function findParent(n,id){ if(!n.children) return null; for(const c of n.children){ if(c.id===id) return n; const f=findParent(c,id); if(f) return f } return null }
+    function findNode(n, id){ 
+      if(n.id===id) return n; 
+      if(!n.children) return null; 
+      for(const c of n.children){ const f=findNode(c,id); if(f) return f } 
+      return null;
+    }
+    function findParent(n,id){ 
+      if(!n.children) return null; 
+      for(const c of n.children){ 
+        if(c.id===id) return n; 
+        const f=findParent(c,id); 
+        if(f) return f; 
+      } 
+      return null;
+    }
 
-    // --- svg & force simulation ---
     const svg = d3.select('#svg');
-    const width = ()=>document.getElementById('canvas').clientWidth;
-    const height = ()=>document.getElementById('canvas').clientHeight;
-
-    const g = svg.append('g'); // main group for pan/zoom
-
+    const g = svg.append('g');
     const zoom = d3.zoom().scaleExtent([0.2,3]).on('zoom', (e)=>g.attr('transform', e.transform));
     svg.call(zoom).on('dblclick.zoom', null);
 
     let selectedId = null;
 
-    // force simulation uses nodes/links
     let simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id(d=>d.id).distance(80).strength(1))
       .force('charge', d3.forceManyBody().strength(-350))
@@ -114,19 +256,15 @@
 
     function update(){
       const {nodes,links} = treeToLists(root);
-
-      // restart simulation with nodes and links
       simulation.nodes(nodes);
       simulation.force('link').links(links);
       simulation.alpha(1).restart();
 
-      // LINKS
       const link = linkG.selectAll('line').data(links, d=>d.source+'-'+d.target);
       link.exit().remove();
       const linkEnter = link.enter().append('line').attr('stroke-width',1.5).attr('stroke', 'rgba(255,255,255,0.06)');
       link.merge(linkEnter);
 
-      // NODES
       const node = nodeG.selectAll('g.node').data(nodes, d=>d.id);
       node.exit().remove();
 
@@ -136,21 +274,23 @@
         .on('end', dragended)
       );
 
-      nodeEnter.append('circle').attr('r',26).attr('class','node-circle').attr('fill','rgba(255,255,255,0.02)');
+      nodeEnter.append('circle').attr('r',26).attr('class','node-circle').attr('fill','rgba(255,255,255,0.03)');
       nodeEnter.append('text').attr('class','node-label').attr('dy',4).attr('text-anchor','middle').text(d=>d.label);
 
-      // events
       nodeEnter.on('click', (e,d)=>{ e.stopPropagation(); selectedId=d.id; refreshSelected(); })
         .on('dblclick', (e,d)=>{ e.stopPropagation(); editNodeLabel(d); })
         .on('contextmenu', (e,d)=>{ e.preventDefault(); e.stopPropagation(); addChildTo(d); });
 
       node.merge(nodeEnter).select('text').text(d=>d.label);
-
       refreshSelected();
     }
 
     function ticked(){
-      linkG.selectAll('line').attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+      linkG.selectAll('line')
+        .attr('x1',d=>d.source.x)
+        .attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x)
+        .attr('y2',d=>d.target.y);
       nodeG.selectAll('g.node').attr('transform', d=>`translate(${d.x},${d.y})`);
     }
 
@@ -158,15 +298,17 @@
     function dragged(event,d){ d.fx=event.x; d.fy=event.y }
     function dragended(event,d){ if(!event.active) simulation.alphaTarget(0); d.fx=null; d.fy=null }
 
-    // interactions
     function refreshSelected(){
-      nodeG.selectAll('g.node').select('circle').attr('stroke', d=> d.id===selectedId ? 'var(--accent)' : 'rgba(255,255,255,0.08)').attr('stroke-width', d=> d.id===selectedId ? 3 : 1.2);
+      nodeG.selectAll('g.node').select('circle')
+        .attr('stroke', d=> d.id===selectedId ? 'var(--accent)' : 'rgba(255,255,255,0.08)')
+        .attr('stroke-width', d=> d.id===selectedId ? 3 : 1.2);
       document.getElementById('selectedInfo').innerText = selectedId ? (findNode(root,selectedId).label + ' (id:'+selectedId+')') : 'None';
     }
 
     function editNodeLabel(node){
       const newLabel = prompt('Edit node label', node.label);
-      if(newLabel===null) return; node.label = newLabel; update();
+      if(newLabel===null) return;
+      node.label = newLabel; update();
     }
 
     function addChildTo(node){
@@ -178,38 +320,47 @@
       selectedId = child.id; refreshSelected();
     }
 
-    // add root sibling (new root)
     function addRoot(){
       const nr = newNode('New Root');
-      // make current root a child of new root
       nr.children.push(root);
       root = nr;
       update();
     }
 
-    // delete selected
-    function deleteSelected(){ if(!selectedId){ alert('No node selected'); return; }
-      if(root.id===selectedId){ if(!confirm('Delete root node? This will promote its first child (if any) as new root or reset map. Proceed?')) return; // proceed
-        if(root.children && root.children.length>0){ root = root.children[0]; // simple promote
-        } else { root = newNode('Central Idea'); }
+    function deleteSelected(){
+      if(!selectedId){ alert('No node selected'); return; }
+      if(root.id===selectedId){
+        if(!confirm('Delete root node? This will reset or promote a child.')) return;
+        if(root.children && root.children.length>0){ root = root.children[0]; }
+        else { root = newNode('Central Idea'); }
         selectedId=null; update(); return;
       }
       const parent = findParent(root, selectedId);
-      if(!parent) return; parent.children = parent.children.filter(c=>c.id!==selectedId); selectedId=null; update(); }
+      if(!parent) return;
+      parent.children = parent.children.filter(c=>c.id!==selectedId);
+      selectedId=null; update();
+    }
 
-    // export/import
     function exportJSON(){
       const json = JSON.stringify(root, null, 2);
       document.getElementById('exportArea').value = json;
       const blob = new Blob([json], {type:'application/json'});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'mindmap.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      const a = document.createElement('a'); 
+      a.href = url; 
+      a.download = 'mindmap.json'; 
+      document.body.appendChild(a); 
+      a.click(); 
+      a.remove(); 
+      URL.revokeObjectURL(url);
     }
 
     function importJSON(file){
       const reader = new FileReader();
       reader.onload = ()=>{
-        try{ const obj = JSON.parse(reader.result); root = obj; // ensure idCounter is high enough
+        try{ 
+          const obj = JSON.parse(reader.result); 
+          root = obj;
           function fixIds(n){ idCounter = Math.max(idCounter, n.id); if(n.children) n.children.forEach(fixIds); }
           fixIds(root);
           update();
@@ -218,33 +369,26 @@
       reader.readAsText(file);
     }
 
-    // UI hooks
-    document.getElementById('addRoot').onclick = ()=>{ addRoot(); };
+    // UI events
+    document.getElementById('addRoot').onclick = ()=> addRoot();
     document.getElementById('addChildBtn').onclick = ()=>{
       if(!selectedId){ alert('Select a node first'); return; }
       const n = findNode(root, selectedId); addChildTo(n);
     };
-    document.getElementById('deleteBtn').onclick = ()=>{ deleteSelected(); };
-    document.getElementById('export').onclick = ()=>{ exportJSON(); };
+    document.getElementById('deleteBtn').onclick = ()=> deleteSelected();
+    document.getElementById('export').onclick = ()=> exportJSON();
     document.getElementById('reset').onclick = ()=>{ if(confirm('Reset mind map to default?')){ idCounter=0; root = newNode('Central Idea'); root.children.push(newNode('Branch A')); root.children.push(newNode('Branch B')); update(); }};
     document.getElementById('importFile').addEventListener('change', (e)=>{ if(e.target.files && e.target.files[0]) importJSON(e.target.files[0]); e.target.value=''; });
     document.getElementById('center').onclick = ()=>{
-      svg.transition().duration(350).call(zoom.transform, d3.zoomIdentity.translate((document.getElementById('canvas').clientWidth/2)-300, (document.getElementById('canvas').clientHeight/2)-200).scale(1));
+      svg.transition().duration(350)
+        .call(zoom.transform, d3.zoomIdentity.translate((document.getElementById('canvas').clientWidth/2)-300, (document.getElementById('canvas').clientHeight/2)-200).scale(1));
     }
 
-    // canvas click to clear selection
     svg.on('click', ()=>{ selectedId=null; refreshSelected(); });
-
-    // keyboard delete key
     window.addEventListener('keydown', (e)=>{ if(e.key==='Delete' || e.key==='Backspace'){ deleteSelected(); } });
-
-    // update on resize
     window.addEventListener('resize', ()=> simulation.force('center', d3.forceCenter(document.getElementById('canvas').clientWidth/2, document.getElementById('canvas').clientHeight/2)).alpha(0.3).restart());
 
-    // initial render
     update();
-
-    // center initial view
     setTimeout(()=>document.getElementById('center').click(), 200);
   </script>
 </body>
