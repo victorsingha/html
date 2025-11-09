@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grey Branch Animation</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="artPlum"></canvas>
+
+  <script>
+    // Constants
+    const MAX_DEPTH = 30;
+    const BRANCH_SPREAD = Math.PI / 12;
+    const STROKE_COLOR = "rgba(200, 200, 200, 0.25)"; // soft translucent grey
+    const LINE_WIDTH = 1.2;
+
+    // Setup canvas
+    const canvas = document.getElementById("artPlum");
+    const ctx = canvas.getContext("2d");
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Helper: compute next point from length + angle
+    function nextPoint(x, y, len, angle) {
+      return [x + len * Math.cos(angle), y + len * Math.sin(angle)];
+    }
+
+    // Animation state
+    let next = [];
+    let tasks = [];
+
+    function branch(x, y, angle, state = { depth: 0 }) {
+      const len = Math.random() * 8 + 2;
+      state.depth++;
+
+      const [nx, ny] = nextPoint(x, y, len, angle);
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(nx, ny);
+      ctx.stroke();
+
+      if (nx < -100 || nx > window.innerWidth + 100 || ny < -100 || ny > window.innerHeight + 100)
+        return;
+
+      const continueChance = state.depth <= MAX_DEPTH ? 0.8 : 0.5;
+      const a1 = angle + Math.random() * BRANCH_SPREAD;
+      const a2 = angle - Math.random() * BRANCH_SPREAD;
+
+      if (Math.random() < continueChance) next.push(() => branch(nx, ny, a1, state));
+      if (Math.random() < continueChance) next.push(() => branch(nx, ny, a2, state));
+    }
+
+    function reset() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = STROKE_COLOR;
+      ctx.lineWidth = LINE_WIDTH;
+      next = [];
+      tasks = [
+        () => branch(Math.random() * window.innerWidth, -5, Math.PI / 2),
+        () => branch(Math.random() * window.innerWidth, window.innerHeight + 5, -Math.PI / 2),
+        () => branch(-5, Math.random() * window.innerHeight, 0),
+        () => branch(window.innerWidth + 5, Math.random() * window.innerHeight, Math.PI)
+      ];
+      if (window.innerWidth < 500) tasks = tasks.slice(0, 2);
+      animate();
+    }
+
+    // Animation loop
+    let last = performance.now();
+    const frameInterval = 1000 / 40;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = performance.now();
+      if (now - last < frameInterval) return;
+      last = now;
+
+      const current = tasks;
+      tasks = [];
+      if (!current.length && !next.length) return;
+
+      current.forEach(f => (Math.random() < 0.5 ? next.push(f) : f()));
+      tasks = next;
+      next = [];
+    }
+
+    // Start
+    ctx.strokeStyle = STROKE_COLOR;
+    ctx.lineWidth = LINE_WIDTH;
+    reset();
+  </script>
+</body>
+</html>
