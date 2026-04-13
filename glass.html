@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glass UI</title>
+
+    <style>
+        :root {
+            --lg-bg-color: rgba(255, 255, 255, 0.25);
+            --lg-highlight: rgba(255, 255, 255, 0.75);
+            --lg-text: #ffffff;
+            --lg-hover-glow: rgba(255, 255, 255, 0.4);
+            --lg-red: #fb4268;
+            --lg-grey: #5b5b5b;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem 0;
+            min-height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: sans-serif;
+            background: url("https://images.unsplash.com/photo-1551384963-cccb0b7ed94b?q=80&w=3247&auto=format&fit=crop") center/cover;
+            animation: bg-move 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes bg-move {
+            from {
+                background-position: center center;
+            }
+
+            to {
+                background-position: center top;
+            }
+        }
+
+
+        .glass-container {
+            position: relative;
+            display: flex;
+            font-weight: 600;
+            color: var(--lg-text);
+            cursor: pointer;
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+        }
+
+
+
+        .glass-filter {
+            position: absolute;
+            inset: 0;
+            backdrop-filter: blur(0px);
+            filter: url(#lg-dist);
+        }
+
+        .glass-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--lg-bg-color);
+        }
+
+        .glass-specular {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 1px 1px 0 var(--lg-highlight),
+                inset 0 0 5px var(--lg-highlight);
+        }
+
+        .glass-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 1rem 1.5rem;
+            z-index: 3;
+        }
+
+
+
+
+        .glass-content a img:hover {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- DOCK -->
+    <div class="container">
+        <div class="glass-container">
+            <div class="glass-filter"></div>
+            <div class="glass-overlay"></div>
+            <div class="glass-specular"></div>
+
+            <div class="glass-content">
+                <a href="#"><img src="https://assets.codepen.io/923404/finder.png"></a>
+                <a href="#"><img src="https://assets.codepen.io/923404/map.png"></a>
+                <a href="#"><img src="https://assets.codepen.io/923404/messages.png"></a>
+                <a href="#"><img src="https://assets.codepen.io/923404/safari.png"></a>
+                <a href="#"><img src="https://assets.codepen.io/923404/books.png"></a>
+            </div>
+
+            <svg style="display:none">
+                <filter id="lg-dist">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="2" />
+                    <feGaussianBlur stdDeviation="2" />
+                    <feDisplacementMap in="SourceGraphic" scale="70" />
+                </filter>
+            </svg>
+        </div>
+    </div>
+
+</body>
+
+</html>
