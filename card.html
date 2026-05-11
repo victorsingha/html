@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arc Card</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+
+      .noise-bg {
+        background-image:
+          radial-gradient(at 70% 40%, transparent 30%, currentColor 80%),
+          url("https://grainy-gradients.vercel.app/noise.svg");
+        background-blend-mode: multiply;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-900">
+    <main class="flex h-screen items-center justify-center">
+      <div class="flex flex-col [perspective:800px]">
+        <div
+          id="card"
+          class="group relative grid w-[260px] grid-rows-[200px_120px_40px] rounded-md bg-[#FFFEEC] p-4 text-[#01A977] transition-transform duration-200 ease-out"
+        >
+          <figure
+            class="noise-bg rounded-md mix-blend-multiply"
+          ></figure>
+
+          <div class="pt-4">
+            <p class="text-3xl font-bold">Jeroen</p>
+            <p class="text-xl">The GOAT 🐐</p>
+          </div>
+
+          <footer class="flex items-end">
+            <p
+              class="flex rounded-sm border border-current px-1 py-px text-[9px] uppercase"
+            >
+              Arc
+
+              <span
+                class="-my-px mx-1 inline-block w-4 border-l border-r border-current bg-[repeating-linear-gradient(-45deg,currentColor,currentColor_1px,transparent_1px,transparent_2px)]"
+              ></span>
+
+              22 Jul 2022
+            </p>
+
+            <div class="ml-auto w-12">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 151 77"
+                fill="none"
+                class="w-full h-auto"
+              >
+                <path
+                  d="M2.792 44.234h8.004c4.175 0 7.542-1.915 7.542-5.236 0-2.676-2.03-4.475-5.167-5.005 2.815-.6 4.683-2.238 4.683-4.544 0-3.022-3.045-4.821-6.735-4.821H2.792v.392c2.283.139 2.56.162 2.56 2.076v14.67c0 1.914-.277 1.937-2.56 2.076v.392Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          </footer>
+
+          <div
+            id="glow"
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200"
+          ></div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const card = document.getElementById("card");
+      const glow = document.getElementById("glow");
+
+      let bounds = null;
+
+      card.addEventListener("mouseenter", () => {
+        bounds = card.getBoundingClientRect();
+        glow.style.opacity = "1";
+      });
+
+      card.addEventListener("mouseleave", () => {
+        glow.style.opacity = "0";
+        card.style.transform =
+          "rotateX(0deg) rotateY(0deg) scale(1)";
+      });
+
+      card.addEventListener("mousemove", (e) => {
+        if (!bounds) return;
+
+        const x = e.clientX - bounds.left;
+        const y = e.clientY - bounds.top;
+
+        const xPercentage = x / bounds.width;
+        const yPercentage = y / bounds.height;
+
+        const xRotation = (0.5 - yPercentage) * 20;
+        const yRotation = (xPercentage - 0.5) * 20;
+
+        card.style.transform = `
+          rotateX(${xRotation}deg)
+          rotateY(${yRotation}deg)
+          scale(1.1)
+        `;
+
+        glow.style.background = `
+          radial-gradient(
+            circle at ${xPercentage * 100}% ${yPercentage * 100}%,
+            rgba(255,255,255,0.3) 20%,
+            transparent 80%
+          )
+        `;
+      });
+    </script>
+  </body>
+</html>
