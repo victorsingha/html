@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directory Listing</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      color: #000000;
+      background-color: #ffffff;
+      margin: 20px;
+    }
+
+    h1 {
+      font-family: "Segoe UI Light", "Segoe UI", Arial, sans-serif;
+      font-weight: normal;
+      font-size: 24px;
+      color: #003399;
+      margin: 0 0 10px 0;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid #cccccc;
+      margin: 10px 0 15px 0;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .search-box {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 3px 8px;
+      border: 1px solid #a6a6a6;
+      border-radius: 2px;
+      width: 220px;
+    }
+
+    .search-box:focus {
+      outline: 1px solid #0066cc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      text-align: left;
+      font-weight: bold;
+      color: #555555;
+      padding: 6px 10px;
+      border-bottom: 1px solid #cccccc;
+      background-color: #f2f2f2;
+      user-select: none;
+    }
+
+    th.sortable {
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      background-color: #e5e5e5;
+      color: #000000;
+    }
+
+    td {
+      padding: 5px 10px;
+      border-bottom: 1px solid #eeeeee;
+      white-space: nowrap;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #fafafa;
+    }
+
+    tr:hover td {
+      background-color: #e8f3ff;
+    }
+
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #003399;
+    }
+
+    .file-icon {
+      margin-right: 8px;
+      font-style: normal;
+    }
+
+    .parent-dir {
+      font-weight: bold;
+    }
+
+    .size-col, .date-col {
+      color: #444444;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <h1>Directory Index</h1>
+    <input type="text" id="searchInput" class="search-box" placeholder="Filter files..." autocomplete="off">
+  </div>
+
+  <hr>
+
+  <table id="dirTable">
+    <thead>
+      <tr>
+        <th class="sortable" onclick="sortTable(0)">Name</th>
+        <th class="sortable" onclick="sortTable(1)">Size</th>
+        <th class="sortable" onclick="sortTable(2)">Date Modified</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="4" class="parent-dir">
+          <a href="#"><span class="file-icon">📁</span>[To Parent Directory]</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href="artplum.html"><span class="file-icon">📄</span>artplum.html</a></td>
+        <td class="size-col" data-bytes="3462">3.4 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="blackhole.html"><span class="file-icon">📄</span>blackhole.html</a></td>
+        <td class="size-col" data-bytes="21637">21.1 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="card.html"><span class="file-icon">📄</span>card.html</a></td>
+        <td class="size-col" data-bytes="3818">3.7 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="datatunnel.html"><span class="file-icon">📄</span>datatunnel.html</a></td>
+        <td class="size-col" data-bytes="13988">13.7 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="familytree.html"><span class="file-icon">📄</span>familytree.html</a></td>
+        <td class="size-col" data-bytes="10007">9.8 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="glass.html"><span class="file-icon">📄</span>glass.html</a></td>
+        <td class="size-col" data-bytes="3648">3.6 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="glitch.html"><span class="file-icon">📄</span>glitch.html</a></td>
+        <td class="size-col" data-bytes="7235">7.1 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="led.html"><span class="file-icon">📄</span>led.html</a></td>
+        <td class="size-col" data-bytes="4390">4.3 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="led2.html"><span class="file-icon">📄</span>led2.html</a></td>
+        <td class="size-col" data-bytes="4564">4.5 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="matrix.html"><span class="file-icon">📄</span>matrix.html</a></td>
+        <td class="size-col" data-bytes="1773">1.7 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="mindmap.html"><span class="file-icon">📄</span>mindmap.html</a></td>
+        <td class="size-col" data-bytes="12806">12.5 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="orgchart.html"><span class="file-icon">📄</span>orgchart.html</a></td>
+        <td class="size-col" data-bytes="3288">3.2 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="orgchart2.html"><span class="file-icon">📄</span>orgchart2.html</a></td>
+        <td class="size-col" data-bytes="3117">3.0 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="orgchart3.html"><span class="file-icon">📄</span>orgchart3.html</a></td>
+        <td class="size-col" data-bytes="4483">4.4 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="space.html"><span class="file-icon">📄</span>space.html</a></td>
+        <td class="size-col" data-bytes="35335">34.5 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="walker.html"><span class="file-icon">📄</span>walker.html</a></td>
+        <td class="size-col" data-bytes="2279">2.2 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="walker_angular15.ts"><span class="file-icon">⚙️</span>walker_angular15.ts</a></td>
+        <td class="size-col" data-bytes="3277">3.2 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>TypeScript File</td>
+      </tr>
+      <tr>
+        <td><a href="web.html"><span class="file-icon">📄</span>web.html</a></td>
+        <td class="size-col" data-bytes="2980">2.9 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="web2.html"><span class="file-icon">📄</span>web2.html</a></td>
+        <td class="size-col" data-bytes="4984">4.9 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="web3.html"><span class="file-icon">📄</span>web3.html</a></td>
+        <td class="size-col" data-bytes="4041">3.9 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+      <tr>
+        <td><a href="wrap.html"><span class="file-icon">📄</span>wrap.html</a></td>
+        <td class="size-col" data-bytes="2482">2.4 KB</td>
+        <td class="date-col">9/18/2026 10:54 AM</td>
+        <td>HTML Document</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = Array.from(document.querySelectorAll('#dirTable tbody tr'));
+
+    searchInput.addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      tableRows.forEach(row => {
+        if (row.querySelector('.parent-dir')) return;
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+
+    let sortDirection = {};
+    function sortTable(colIndex) {
+      const tbody = document.querySelector('#dirTable tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.querySelector('.parent-dir'));
+      const dirRow = tbody.querySelector('.parent-dir')?.parentElement;
+
+      sortDirection[colIndex] = !sortDirection[colIndex];
+      const asc = sortDirection[colIndex];
+
+      rows.sort((a, b) => {
+        let valA, valB;
+        if (colIndex === 1) {
+          valA = parseInt(a.children[1].getAttribute('data-bytes') || 0);
+          valB = parseInt(b.children[1].getAttribute('data-bytes') || 0);
+        } else {
+          valA = a.children[colIndex].textContent.trim().toLowerCase();
+          valB = b.children[colIndex].textContent.trim().toLowerCase();
+        }
+
+        if (valA < valB) return asc ? -1 : 1;
+        if (valA > valB) return asc ? 1 : -1;
+        return 0;
+      });
+
+      if (dirRow) tbody.appendChild(dirRow);
+      rows.forEach(r => tbody.appendChild(r));
+    }
+  </script>
+</body>
+</html>
